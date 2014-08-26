@@ -1,15 +1,16 @@
 from django.shortcuts import render
-
-# Create your views here.
 from registry_app.models import User_ssh
-# Create your views here.
 from registry_app.serializers import UserSshRegisSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 
+listrequest = []
+
 @api_view(['GET','POST'])
 def user_list(request, format=None):
+	global listrequest
+	listrequest.append(request)
 	if request.method == 'GET':
 		user = User_ssh.objects.all()
 # 		user = User_ssh.objects.filter(pool = 'ssh')
@@ -22,12 +23,17 @@ def user_list(request, format=None):
 			serializer.save()
 			return  Response(serializer.data, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	print('list request --------------')
+	for i in listrequest: print(str(i))
 	
 
 @api_view(['GET','PUT','DELETE'])
 def user_detail(request,pool,format=None):
+	global listrequest
+	listrequest.append(request)
+	print('list request --------------')
+	for i in listrequest: print(str(i))
 	try:
-# 		user = User_ssh.objects.get(pool = pool)
 		user = User_ssh.objects.filter(pool = pool)
 	except User_ssh.DoesNotExist:
 		return Response(status=status.HTTP_404_NOT_FOUND)
@@ -41,6 +47,7 @@ def user_detail(request,pool,format=None):
 			return Response(serializer.data)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 	elif request.method=='DELETE':
+	
 		user.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
